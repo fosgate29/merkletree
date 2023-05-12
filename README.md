@@ -28,3 +28,5 @@ that I had to add a "0x" text when hashing using javscript.
 
 My solution was to create a Merkle Tree where each leaf was a hash. A Leaf
 were a hash of wallets and amounts for the transfers.
+
+![MerkleTree](merkletree.png)
