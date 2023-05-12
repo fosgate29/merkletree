@@ -13,8 +13,22 @@ async function deployTokenFixture() {
 
   await token.deployed();
 
+  const allWallets = [];
+  const allAmounts = [];
+  for (let i = 1; i < 6; i++) {
+    const wallets = [];
+    const amounts = [];
+    for (let j = 1; j < 8; j++) {
+      let newAddress = ethers.Wallet.createRandom().address;
+      wallets.push(newAddress);
+      amounts.push(j + i);
+    }
+    allWallets.push(wallets);
+    allAmounts.push(amounts);
+  }
+
   // Fixtures can return anything you consider useful for your tests
-  return { MTbatch, token, owner, unauthorisedUser, addr2, addr3, addr4 };
+  return { MTbatch, token, owner, unauthorisedUser, addr2, addr3, addr4, allWallets, allAmounts };
 }
 
 module.exports = {

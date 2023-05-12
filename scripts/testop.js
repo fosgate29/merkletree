@@ -1,13 +1,14 @@
-const { MerkleTree } = require('merkletreejs');
+const { StandardMerkleTree } = require('@openzeppelin/merkle-tree');
 const keccak256 = require('keccak256');
 const ethers = require('ethers');
+const fs = require('fs');
 
-const roots = [];
-const trees = [];
-const hashes = [];
+let hashes = [];
 
 // hash each transfer tx
 let finalHash;
+
+const values = [];
 
 finalHash = keccak256(
   '0x5b38da6a701c568545dcfcb03fcb875f56beddc400000000000000000000000000000000000000000000000000000000000001f4'
@@ -20,7 +21,10 @@ let tupla = ethers.utils.solidityPack(
 
 finalHash = keccak256(tupla);
 
-hashes.push(finalHash.toString('hex'));
+hashes.push('0x' + finalHash.toString('hex'));
+
+values.push(hashes);
+console.log(values);
 
 for (let i = 1; i < 4; i++) {
   let newAddress = ethers.Wallet.createRandom().address;
@@ -35,21 +39,30 @@ for (let i = 1; i < 4; i++) {
     finalHash = keccak256(tupla);
   }
 
-  hashes.push(finalHash.toString('hex'));
+  hashes = [];
+  hashes.push('0x' + finalHash.toString('hex'));
+  values.push(hashes);
 }
 
-const tree = new MerkleTree(hashes, keccak256);
-console.log(tree.toString());
+const tree = StandardMerkleTree.of(values, ['bytes32']);
 
-const root = tree.getRoot(); //.toString('hex');
-console.log('root - ', root.toString('hex'));
+//console.log('Merkle Root:', tree.root);
 
-// let's create a merkle tree with merkle tree roots
+for (const [i, v] of tree.entries()) {
+  if (v[0] === '0xbc4b8c6cc50f1918f2c33031c8b93ea7b400500474068e5bec1dba708e3f8ef6') {
+    //console.log(i);
+    const proof = tree.getProof(i);
+    console.log('Proof:', proof);
+  }
+}
 
-const leaf = hashes[0];
-console.log('leaf ', leaf.toString('hex'));
-const proof = tree.getProof(leaf);
-console.log('p1', proof[0].data.toString('hex'));
-console.log('p2', proof[1].data.toString('hex'));
+const proof = tree.getProof(0);
+const verified = StandardMerkleTree.verify(
+  tree.root,
+  ['bytes32'],
+  ['0xbc4b8c6cc50f1918f2c33031c8b93ea7b400500474068e5bec1dba708e3f8ef6'],
+  proof
+);
 
-console.log(tree.verify(proof, leaf, root));
+console.log(verified);
+console.log(tree.render());
