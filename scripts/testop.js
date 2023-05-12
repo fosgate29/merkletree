@@ -1,6 +1,7 @@
 const { StandardMerkleTree } = require('@openzeppelin/merkle-tree');
 const keccak256 = require('keccak256');
 const ethers = require('ethers');
+const fs = require('fs');
 
 let hashes = [];
 
@@ -21,7 +22,9 @@ let tupla = ethers.utils.solidityPack(
 finalHash = keccak256(tupla);
 
 hashes.push('0x' + finalHash.toString('hex'));
+
 values.push(hashes);
+console.log(values);
 
 for (let i = 1; i < 4; i++) {
   let newAddress = ethers.Wallet.createRandom().address;
@@ -41,24 +44,25 @@ for (let i = 1; i < 4; i++) {
   values.push(hashes);
 }
 
-// create tree
-
-// ['0xbc4b8c6cc50f1918f2c33031c8b93ea7b400500474068e5bec1dba708e3f8ef6'],
-// ['0x17a9a1c28112f9d1a9234400cdeff0fcc07363f50bcb3940f0b36ea198666c2e']
-//];
-console.log(values);
-
-// (2)
 const tree = StandardMerkleTree.of(values, ['bytes32']);
 
-// (3)
-console.log('Merkle Root:', tree.root);
+//console.log('Merkle Root:', tree.root);
 
 for (const [i, v] of tree.entries()) {
   if (v[0] === '0xbc4b8c6cc50f1918f2c33031c8b93ea7b400500474068e5bec1dba708e3f8ef6') {
-    // (3)
+    //console.log(i);
     const proof = tree.getProof(i);
-    console.log('Value:', v);
     console.log('Proof:', proof);
   }
 }
+
+const proof = tree.getProof(0);
+const verified = StandardMerkleTree.verify(
+  tree.root,
+  ['bytes32'],
+  ['0xbc4b8c6cc50f1918f2c33031c8b93ea7b400500474068e5bec1dba708e3f8ef6'],
+  proof
+);
+
+console.log(verified);
+console.log(tree.render());

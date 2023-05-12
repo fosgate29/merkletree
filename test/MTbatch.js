@@ -9,24 +9,57 @@ const ethers = require('ethers');
 
 describe('MTBatch contract', function () {
   /* Simple test 
-	└─ ec17b6e2eb34917be3a975b67931380f7437fd3c9768f927c2db4025bc9d0fc9   // Proof
-   ├─ 9da137fb3ca535f5dfcc27f9f4cf8ac9f375dca42354212f8545244ee36eabea  // address 0x5b38da6a701c568545dcfcb03fcb875f56beddc4
-   └─ cd058cf3a7e182fbad392721ca38cc12de70e15a9e4cd10ce1ac83bd9e0adaa5  // address 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2
+0) 2d367c5723f6640dc5d3c8f0f114a520e8942969627fa8d50598ce7608c993f6   - Root
+├─ 1) 5b4630a9af86d430e296f53812358c8c5b5d2ead3c79d3212188c8331c447726    - Proof 1
+│  ├─ 3) edb77a3793b9039b821555a27afd4f36519c8e3e5a99ce0595390833093daf12
+│  └─ 4) aee0c798b225a78c7a45b2b42284b62ca5f71fa1da62ee313e9d0fe6f11461a0
+└─ 2) b79b122e6d2548fd47d3dd45487d925cda47ae28f1eeb30edc9dc2807c87a581
+   ├─ 5) a7b2b26f7fd35049e118ad94a9bbd78c3e63b054701930bba1455465f54b8d82  - Proof 2
+   └─ 6) 96f62e27e9cb7e8d94a912ef3b5ee0da0a51b925fee81670bdeb7b4bc0d39c6d
+
+   Proof: [
+  'a7b2b26f7fd35049e118ad94a9bbd78c3e63b054701930bba1455465f54b8d82',
+  '5b4630a9af86d430e296f53812358c8c5b5d2ead3c79d3212188c8331c447726'
+    ]
 	*/
-  it('Should be able to set proof root and call transfer', async function () {
+  it.only('Should be able to set proof root and call transfer', async function () {
     const { token, owner, addr2, addr3, addr4 } = await loadFixture(fixtures.deployTokenFixture);
 
     const addr = '0x5b38da6a701c568545dcfcb03fcb875f56beddc4';
     let balanceOf = await token.balanceOf(addr2.address);
     expect(balanceOf).to.equal(0);
 
-    await token.setProof('0xec17b6e2eb34917be3a975b67931380f7437fd3c9768f927c2db4025bc9d0fc9');
+    await token.setRoot('0x2d367c5723f6640dc5d3c8f0f114a520e8942969627fa8d50598ce7608c993f6');
 
-    // send hash of 0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2 + 500
     let tx = await token.executeTransfer(
-      ['0xcd058cf3a7e182fbad392721ca38cc12de70e15a9e4cd10ce1ac83bd9e0adaa5'],
-      addr,
-      500
+      [
+        '0xa7b2b26f7fd35049e118ad94a9bbd78c3e63b054701930bba1455465f54b8d82',
+        '0x5b4630a9af86d430e296f53812358c8c5b5d2ead3c79d3212188c8331c447726'
+      ],
+      ['0x5b38da6a701c568545dcfcb03fcb875f56beddc4', '0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2'],
+      [500, 500]
+    );
+
+    balanceOf = await token.balanceOf(addr);
+    expect(balanceOf).to.equal(500);
+  });
+
+  it('Should be able to set proof root and call transfer from ', async function () {
+    const { token, owner, addr2, addr3, addr4 } = await loadFixture(fixtures.deployTokenFixture);
+
+    const addr = '0x5b38da6a701c568545dcfcb03fcb875f56beddc4';
+    let balanceOf = await token.balanceOf(addr2.address);
+    expect(balanceOf).to.equal(0);
+
+    await token.setRoot('0x2d367c5723f6640dc5d3c8f0f114a520e8942969627fa8d50598ce7608c993f6');
+
+    let tx = await token.executeTransfer(
+      [
+        '0xa7b2b26f7fd35049e118ad94a9bbd78c3e63b054701930bba1455465f54b8d82',
+        '0x5b4630a9af86d430e296f53812358c8c5b5d2ead3c79d3212188c8331c447726'
+      ],
+      ['0x5b38da6a701c568545dcfcb03fcb875f56beddc4', '0xAb8483F64d9C6d1EcF9b849Ae677dD3315835cb2'],
+      [500, 500]
     );
 
     balanceOf = await token.balanceOf(addr);
